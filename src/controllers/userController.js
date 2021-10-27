@@ -213,8 +213,123 @@ const googleLogin = asyncHandler(async (req, res, next) => {
 	);
 });
 
+const updateBaseLocation = asyncHandler(async (req, res, next) => {
+	const { latitude, longitude } = req.body;
+	
+	db.query(
+		`UPDATE users SET baseLatitude = ?, baseLongitude = ? WHERE userId=?;`,
+		[latitude,longitude,req.user.userId],
+		async (err, results) => {
+			if (err) {
+				console.log(err);
+				res.status(500);
+				next(new Error("Server Error"));
+			} else {
+				res.status(200).json({
+					msg: "Base Location Updated",
+					success: true,
+				});
+			}
+		}
+	);
+});
+
+const updateProfile = asyncHandler(async (req, res, next) => {
+	const { latitude, longitude } = req.body;
+	
+	db.query(
+		`UPDATE users SET baseLatitude = ?, baseLongitude = ? WHERE userId=?;`,
+		[latitude,longitude,req.user.userId],
+		async (err, results) => {
+			if (err) {
+				console.log(err);
+				res.status(500);
+				next(new Error("Server Error"));
+			} else {
+				res.status(200).json({
+					msg: "Base Location Updated",
+					success: true,
+				});
+			}
+		}
+	);
+});
+const getProfile = asyncHandler(async (req, res, next) => {
+	
+	let userInfo;
+	db.query(
+		`SELECT * FROM users WHERE userId=?`,
+		[req.user.userId],
+		async (err, results) => {
+			if (err) {
+				console.log(err);
+				res.status(500);
+				next(new Error("Server Error"));
+			} else {
+				userInfo=results[0];
+			}
+		}
+	);
+
+	let sellerProducts;
+	db.query(
+		`SELECT * FROM products WHERE seller=?`,
+		[req.user.userId],
+		async (err, results) => {
+			if (err) {
+				console.log(err);
+				res.status(500);
+				next(new Error("Server Error"));
+			} else {
+				sellerProducts=results;
+			}
+		}
+	);
+
+	let sellerOrders;
+	db.query(
+		`SELECT * FROM orders WHERE sellerId=?`,
+		[req.user.userId],
+		async (err, results) => {
+			if (err) {
+				console.log(err);
+				res.status(500);
+				next(new Error("Server Error"));
+			} else {
+				sellerOrders=results;
+			}
+		}
+	);
+
+	let myOrders;
+	db.query(
+		`SELECT * FROM orders WHERE userId=?`,
+		[req.user.userId],
+		async (err, results) => {
+			if (err) {
+				console.log(err);
+				res.status(500);
+				next(new Error("Server Error"));
+			} else {
+				myOrders=results;
+				res.status(200).json({
+					msg: "User Profile Info",
+					data:{
+						userInfo,
+						sellerProducts,
+						sellerOrders,
+						myOrders
+					},
+					success: true,
+				});
+			}
+		}
+	);
+});
 module.exports = {
 	login,
 	register,
 	googleLogin,
+	updateBaseLocation,
+	getProfile
 };
