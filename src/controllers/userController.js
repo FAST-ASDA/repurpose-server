@@ -10,6 +10,7 @@ const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 
 const db = require("../config/db.js");
+const { uploadS3 } = require("../utils/uploadaws.js");
 
 dotenv.config();
 
@@ -326,10 +327,145 @@ const getProfile = asyncHandler(async (req, res, next) => {
 		}
 	);
 });
+const getSellerProfile = asyncHandler(async (req, res, next) => {
+	const { sellerId } = req.query;
+
+    const hit ={
+        userId: req.user.userId,
+        sellerId: sellerId
+    }
+
+	// insert the hit into the database
+	db.query(
+		`INSERT INTO hits SET ?`,
+		hit,
+		async (err, results) => {
+			if (err) {
+				console.log(err);
+				res.status(500);
+				next(new Error("Server Error"));
+			}
+		}
+	);
+	// fetch sellerhits
+	let sellerHits;
+    db.query(
+		`SELECT COUNT(*) as hits FROM hits WHERE sellerId = ?`, [sellerId],
+		async (err, results) => {
+			if (err) {
+				console.log(err);
+				res.status(500);
+				next(new Error("Server Error"));
+			}
+            else{
+                sellerHits=results[0];
+            }
+		}
+	);
+	
+
+	// fetch seller info
+	let sellerInfo;
+	db.query(
+		`SELECT firstName, lastName, email, city,state, country FROM users WHERE userId=? and isSeller=1`,
+		[sellerId],
+		async (err, results) => {
+			if (err) {
+				console.log(err);
+				res.status(500);
+				next(new Error("Server Error"));
+			} else {
+				sellerInfo=results[0];
+			}
+		}
+	);
+
+	let sellerProducts;
+	db.query(
+		`SELECT * FROM products WHERE seller=?`,
+		[sellerId],
+		async (err, results) => {
+			if (err) {
+				console.log(err);
+				res.status(500);
+				next(new Error("Server Error"));
+			} else {
+				sellerProducts=results;
+				res.status(200).json({
+					msg: "Seller profile Info",
+					data:{
+						sellerHits,
+						sellerInfo,
+						sellerProducts
+					},
+					success: true,
+				});
+			}
+		}
+	);
+
+});
+
+
+const addSellerPictures = asyncHandler(async (req, res, next) => {
+
+    let pictures = req.files.pictures;
+
+	let promises = [], picturesArray = [];
+
+	// console.log(Object.getPrototypeOf(files))
+	if (Array.isArray(pictures)) { }
+	else {
+		pictures = [pictures]
+	}
+
+	for (var i = 0; i < pictures.length; i++) {
+		var picture = pictures[i];
+		console.log(picture)
+		promises.push(uploadS3(picture, picturesArray));
+	}
+
+	Promise.all(promises).then(function (data) {
+
+		let images = [];
+		console.log(picturesArray)
+		for (let i = 0; i < picturesArray.length; i++) {
+			console.log('picturenm', picturesArray[i]);
+			images.push([picturesArray[i], req.user.userId, req.user.userId ])
+		}
+		// do all logic inside this
+		db.query(
+			`INSERT INTO pictures (key, sellerId, userId) VALUES ?`,
+			[images],
+			async (err, results) => {
+				if (err) {
+					console.log(err);
+					res.status(500);
+					next(new Error("Server Error"));
+				} else {
+				
+					res.status(200).json({
+						msg: "Seller Images",
+						data: {
+							picturesArray
+						},
+						success: true,
+					});
+				}
+			}
+		);
+		
+	})
+
+});
+
+
 module.exports = {
 	login,
 	register,
 	googleLogin,
 	updateBaseLocation,
-	getProfile
+	getProfile,
+	getSellerProfile,
+	addSellerPictures
 };

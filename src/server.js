@@ -8,6 +8,7 @@ const socketio = require("socket.io");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware.js");
 const dashboardRoutes = require("./routes/dashboardRoutes.js");
 const userRoutes = require("./routes/userRoutes.js");
+const productRoutes = require("./routes/productRoutes.js");
 
 const app = express();
 const dotenv = require("dotenv");
@@ -50,6 +51,7 @@ const run = () => {
 	});
 	app.use("/api/user", userRoutes);
 	app.use("/api/dashboard", dashboardRoutes);
+	app.use("/api/product", productRoutes);
 	app.use(notFound);
 	app.use(errorHandler);
 
