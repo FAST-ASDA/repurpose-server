@@ -216,10 +216,10 @@ const googleLogin = asyncHandler(async (req, res, next) => {
 
 const updateBaseLocation = asyncHandler(async (req, res, next) => {
 	const { latitude, longitude } = req.body;
-	
+
 	db.query(
 		`UPDATE users SET baseLatitude = ?, baseLongitude = ? WHERE userId=?;`,
-		[latitude,longitude,req.user.userId],
+		[latitude, longitude, req.user.userId],
 		async (err, results) => {
 			if (err) {
 				console.log(err);
@@ -237,10 +237,10 @@ const updateBaseLocation = asyncHandler(async (req, res, next) => {
 
 const updateProfile = asyncHandler(async (req, res, next) => {
 	const { latitude, longitude } = req.body;
-	
+
 	db.query(
 		`UPDATE users SET baseLatitude = ?, baseLongitude = ? WHERE userId=?;`,
-		[latitude,longitude,req.user.userId],
+		[latitude, longitude, req.user.userId],
 		async (err, results) => {
 			if (err) {
 				console.log(err);
@@ -256,7 +256,7 @@ const updateProfile = asyncHandler(async (req, res, next) => {
 	);
 });
 const getProfile = asyncHandler(async (req, res, next) => {
-	
+
 	let userInfo;
 	db.query(
 		`SELECT * FROM users WHERE userId=?`,
@@ -267,7 +267,7 @@ const getProfile = asyncHandler(async (req, res, next) => {
 				res.status(500);
 				next(new Error("Server Error"));
 			} else {
-				userInfo=results[0];
+				userInfo = results[0];
 			}
 		}
 	);
@@ -282,7 +282,7 @@ const getProfile = asyncHandler(async (req, res, next) => {
 				res.status(500);
 				next(new Error("Server Error"));
 			} else {
-				sellerProducts=results;
+				sellerProducts = results;
 			}
 		}
 	);
@@ -297,7 +297,7 @@ const getProfile = asyncHandler(async (req, res, next) => {
 				res.status(500);
 				next(new Error("Server Error"));
 			} else {
-				sellerOrders=results;
+				sellerOrders = results;
 			}
 		}
 	);
@@ -312,10 +312,10 @@ const getProfile = asyncHandler(async (req, res, next) => {
 				res.status(500);
 				next(new Error("Server Error"));
 			} else {
-				myOrders=results;
+				myOrders = results;
 				res.status(200).json({
 					msg: "User Profile Info",
-					data:{
+					data: {
 						userInfo,
 						sellerProducts,
 						sellerOrders,
@@ -330,10 +330,10 @@ const getProfile = asyncHandler(async (req, res, next) => {
 const getSellerProfile = asyncHandler(async (req, res, next) => {
 	const { sellerId } = req.query;
 
-    const hit ={
-        userId: req.user.userId,
-        sellerId: sellerId
-    }
+	const hit = {
+		userId: req.user.userId,
+		sellerId: sellerId
+	}
 
 	// insert the hit into the database
 	db.query(
@@ -349,7 +349,7 @@ const getSellerProfile = asyncHandler(async (req, res, next) => {
 	);
 	// fetch sellerhits
 	let sellerHits;
-    db.query(
+	db.query(
 		`SELECT COUNT(*) as hits FROM hits WHERE sellerId = ?`, [sellerId],
 		async (err, results) => {
 			if (err) {
@@ -357,12 +357,12 @@ const getSellerProfile = asyncHandler(async (req, res, next) => {
 				res.status(500);
 				next(new Error("Server Error"));
 			}
-            else{
-                sellerHits=results[0];
-            }
+			else {
+				sellerHits = results[0];
+			}
 		}
 	);
-	
+
 
 	// fetch seller info
 	let sellerInfo;
@@ -375,7 +375,7 @@ const getSellerProfile = asyncHandler(async (req, res, next) => {
 				res.status(500);
 				next(new Error("Server Error"));
 			} else {
-				sellerInfo=results[0];
+				sellerInfo = results[0];
 			}
 		}
 	);
@@ -390,10 +390,10 @@ const getSellerProfile = asyncHandler(async (req, res, next) => {
 				res.status(500);
 				next(new Error("Server Error"));
 			} else {
-				sellerProducts=results;
+				sellerProducts = results;
 				res.status(200).json({
 					msg: "Seller profile Info",
-					data:{
+					data: {
 						sellerHits,
 						sellerInfo,
 						sellerProducts
@@ -409,7 +409,7 @@ const getSellerProfile = asyncHandler(async (req, res, next) => {
 
 const addSellerPictures = asyncHandler(async (req, res, next) => {
 
-    let pictures = req.files.pictures;
+	let pictures = req.files.pictures;
 
 	let promises = [], picturesArray = [];
 
@@ -431,7 +431,7 @@ const addSellerPictures = asyncHandler(async (req, res, next) => {
 		console.log(picturesArray)
 		for (let i = 0; i < picturesArray.length; i++) {
 			console.log('picturenm', picturesArray[i]);
-			images.push([picturesArray[i], req.user.userId, req.user.userId ])
+			images.push([picturesArray[i], req.user.userId, req.user.userId])
 		}
 		// do all logic inside this
 		db.query(
@@ -443,7 +443,7 @@ const addSellerPictures = asyncHandler(async (req, res, next) => {
 					res.status(500);
 					next(new Error("Server Error"));
 				} else {
-				
+
 					res.status(200).json({
 						msg: "Seller Images",
 						data: {
@@ -454,10 +454,30 @@ const addSellerPictures = asyncHandler(async (req, res, next) => {
 				}
 			}
 		);
-		
+
 	})
 
 });
+const updateAddress = asyncHandler(async (req, res, next) => {
+	const { addressLine1, addressLine2, pincode, city, state, country } = req.body;
+
+	db.query(`UPDATE users SET addressLine1=?, addressLine2=?,city=?,state=?,country=?,pincode=? WHERE userId=?;`,
+		[addressLine1, addressLine2, city, state, country, pincode, req.user.userId],
+		async (err, results) => {
+			if (err) {
+				console.log(err);
+				res.status(500);
+				next(new Error("Server Error"))
+			}
+			else {
+				res.status(200).json({
+					msg: "Address Updated",
+					success: true
+				})
+			}
+		}
+	)
+})
 
 
 module.exports = {
@@ -467,5 +487,7 @@ module.exports = {
 	updateBaseLocation,
 	getProfile,
 	getSellerProfile,
-	addSellerPictures
+	addSellerPictures,
+	updateAddress
+
 };
