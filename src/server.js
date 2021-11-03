@@ -22,7 +22,7 @@ dotenv.config();
 // 	secretAccessKey: process.env.AWS_SECRET_KEY,
 // 	region: process.env.AWS_REGION,
 // });
-const port = 5000 || process.env.PORT;
+const port = process.env.PORT || 5000;
 // const s3 = new AWS.S3();
 const server = http.createServer(app);
 const io = socketio(server, {
