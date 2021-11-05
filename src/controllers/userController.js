@@ -235,26 +235,7 @@ const updateBaseLocation = asyncHandler(async (req, res, next) => {
 	);
 });
 
-const updateProfile = asyncHandler(async (req, res, next) => {
-	const { latitude, longitude } = req.body;
 
-	db.query(
-		`UPDATE users SET baseLatitude = ?, baseLongitude = ? WHERE userId=?;`,
-		[latitude, longitude, req.user.userId],
-		async (err, results) => {
-			if (err) {
-				console.log(err);
-				res.status(500);
-				next(new Error("Server Error"));
-			} else {
-				res.status(200).json({
-					msg: "Base Location Updated",
-					success: true,
-				});
-			}
-		}
-	);
-});
 const getProfile = asyncHandler(async (req, res, next) => {
 
 	let userInfo;

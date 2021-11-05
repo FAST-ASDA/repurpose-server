@@ -38,7 +38,7 @@ const postLocation = asyncHandler(async (req, res, next) => {
 const getTrendingThrifts = asyncHandler(async (req, res, next) => {
 	
 	db.query(
-		`SELECT longitude, latitude FROM locations WHERE userId=? ORDER BY timestamp DESC LIMIT 1`,
+		`SELECT baseLongitude, baseLatitude FROM users WHERE userId=?`,
 		req.user.userId,
 		async (err, results) => {
 			if (err) {
@@ -46,10 +46,12 @@ const getTrendingThrifts = asyncHandler(async (req, res, next) => {
 				res.status(500);
 				next(new Error("Server Error"));
 			} else {
+
+				// add photos
 				const userLocation = results[0];
-				const lat1 = userLocation.latitude;
-				const lng1 = userLocation.longitude
-		
+				const lat1 = userLocation.baseLatitude;
+				const lng1 = userLocation.baseLongitude
+				
 				const query = `SELECT *, (6371 * acos(cos( radians(baseLatitude) ) * cos( radians( ${lat1} ) ) * cos( radians( ${lng1} ) - radians(baseLongitude) ) + sin( radians(baseLatitude) ) * sin( radians( ${lat1} ) ) ) ) as distance from products INNER JOIN users ON products.sellerId=users.userId ORDER BY distance ASC LIMIT 10`
 				db.query(
 					query,
@@ -76,7 +78,7 @@ const getTrendingThrifts = asyncHandler(async (req, res, next) => {
 const getTrendingSellers = asyncHandler(async (req, res, next) => {
 	
 	db.query(
-		`SELECT longitude, latitude FROM locations WHERE userId=? ORDER BY timestamp DESC LIMIT 1`,
+		`SELECT longitude, latitude FROM users WHERE userId=?`,
 		req.user.userId,
 		async (err, results) => {
 			if (err) {
@@ -85,8 +87,8 @@ const getTrendingSellers = asyncHandler(async (req, res, next) => {
 				next(new Error("Server Error"));
 			} else {
 				const userLocation = results[0];
-				const lat1 = userLocation.latitude;
-				const lng1 = userLocation.longitude
+				const lat1 = userLocation.baseLatitude;
+				const lng1 = userLocation.baseLongitude
 		
 				const query = `SELECT *, (6371 * acos(cos( radians(baseLatitude) ) * cos( radians( ${lat1} ) ) * cos( radians( ${lng1} ) - radians(baseLongitude) ) + sin( radians(baseLatitude) ) * sin( radians( ${lat1} ) ) ) ) as distance from users WHERE isSeller=1 AND userId <> ${req.user.userId} ORDER BY distance ASC LIMIT 10`
 				db.query(
