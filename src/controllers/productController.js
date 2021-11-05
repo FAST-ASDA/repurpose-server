@@ -57,7 +57,7 @@ const getProductDetails = asyncHandler(async (req, res, next) => {
 		}
 	);
 	db.query(
-		`SELECT productId,name,isSold,gender,category,kids,dateOfPurchase,size,seller,brand,totalPrice,productDescription, seller, firstName, lastName FROM products INNER JOIN users on products.seller=users.userId WHERE productId=?`,
+		`SELECT productId,title,isSold,gender,category,kids,dateOfPurchase,size,sellerId,brand,totalPrice,description, firstName, lastName FROM products INNER JOIN users on products.sellerId=users.userId WHERE productId=?`,
 		[productId],
 		async (err, results) => {
 			if (err) {
@@ -86,7 +86,7 @@ const createProduct = asyncHandler(async (req, res, next) => {
 
 	let pictures = req.files.pictures;
 
-	const { } = req.body;
+	const {title,brand, description, gender,category, isKids, dop, size, basePrice} = req.body;
 
 	let promises = [], picturesArray = [];
 
@@ -106,13 +106,70 @@ const createProduct = asyncHandler(async (req, res, next) => {
 
 	Promise.all(promises).then(function (data) {
 		// do all logic inside this
-		res.status(200).json({
-			msg: "Product Images",
-			data: {
-				picturesArray
-			},
-			success: true,
-		});
+		
+		// make the product
+
+		const product ={
+			title: title,
+			brand: brand,
+			notThrift : 0,
+			description: description,
+			gender: gender,
+			category: category,
+			kids: isKids,
+			dateOfPurchase: dop,
+			size: size,
+			sellerId: req.user.userId,
+			basePrice: basePrice
+		}
+		let newProductId;
+		db.query(
+			`INSERT INTO products SET ?`,
+			product,
+			async (err, results) => {
+				if (err) {
+					console.log(err);
+					res.status(500);
+					next(new Error("Server Error"));
+				}
+				else{
+					newProductId = results.insertId
+				}
+			}
+		);
+
+		// insert images at last
+		let images = [];
+		console.log(picturesArray)
+		for (let i = 0; i < picturesArray.length; i++) {
+			console.log('picturenm', picturesArray[i]);
+			images.push([picturesArray[i], req.user.userId, req.user.userId], newProductId)
+		}
+		// do all logic inside this
+		db.query(
+			`INSERT INTO pictures (key, sellerId, userId, productId) VALUES ?`,
+			[images],
+			async (err, results) => {
+				if (err) {
+					console.log(err);
+					res.status(500);
+					next(new Error("Server Error"));
+				} else {
+
+					res.status(200).json({
+						msg: "Product Images",
+						data: {
+							picturesArray
+						},
+						success: true,
+					});
+				}
+			}
+		);
+
+
+
+
 		
 	})
     

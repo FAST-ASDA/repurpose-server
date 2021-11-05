@@ -50,7 +50,7 @@ const getTrendingThrifts = asyncHandler(async (req, res, next) => {
 				const lat1 = userLocation.latitude;
 				const lng1 = userLocation.longitude
 		
-				const query = `SELECT *, (6371 * acos(cos( radians(baseLatitude) ) * cos( radians( ${lat1} ) ) * cos( radians( ${lng1} ) - radians(baseLongitude) ) + sin( radians(baseLatitude) ) * sin( radians( ${lat1} ) ) ) ) as distance from products INNER JOIN users ON products.seller=users.userId ORDER BY distance ASC LIMIT 10`
+				const query = `SELECT *, (6371 * acos(cos( radians(baseLatitude) ) * cos( radians( ${lat1} ) ) * cos( radians( ${lng1} ) - radians(baseLongitude) ) + sin( radians(baseLatitude) ) * sin( radians( ${lat1} ) ) ) ) as distance from products INNER JOIN users ON products.sellerId=users.userId ORDER BY distance ASC LIMIT 10`
 				db.query(
 					query,
 					async (err, results) => {
