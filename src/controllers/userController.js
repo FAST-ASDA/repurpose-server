@@ -380,6 +380,20 @@ const getSellerProfile = asyncHandler(async (req, res, next) => {
 		}
 	);
 
+	let sellerImages;
+    db.query(
+		`SELECT imageId,imageKey FROM images WHERE sellerId = ?`, [sellerId],
+		async (err, results) => {
+			if (err) {
+				console.log(err);
+				res.status(500);
+				next(new Error("Server Error"));
+			}
+            else{
+                sellerImages=results;
+            }
+		}
+	);
 	let sellerProducts;
 	db.query(
 		`SELECT * FROM products WHERE seller=?`,
@@ -396,7 +410,8 @@ const getSellerProfile = asyncHandler(async (req, res, next) => {
 					data: {
 						sellerHits,
 						sellerInfo,
-						sellerProducts
+						sellerProducts,
+						sellerImages
 					},
 					success: true,
 				});
@@ -431,11 +446,11 @@ const addSellerPictures = asyncHandler(async (req, res, next) => {
 		console.log(picturesArray)
 		for (let i = 0; i < picturesArray.length; i++) {
 			console.log('picturenm', picturesArray[i]);
-			images.push([picturesArray[i], req.user.userId, req.user.userId])
+			images.push([picturesArray[i],req.user.userId,req.user.userId])
 		}
 		// do all logic inside this
 		db.query(
-			`INSERT INTO pictures (key, sellerId, userId) VALUES ?`,
+			`INSERT INTO images (imageKey,sellerId, userId) VALUES ?`,
 			[images],
 			async (err, results) => {
 				if (err) {

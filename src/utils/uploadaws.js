@@ -30,6 +30,9 @@ const uploadS3 = (file, filesArray) => {
 	  })
 	})
 }
+
+
+
 module.exports = {
 	uploadS3,
 };

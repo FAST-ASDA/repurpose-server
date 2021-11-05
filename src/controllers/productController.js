@@ -9,6 +9,7 @@ const axios = require("axios");
 const asyncHandler = require("express-async-handler");
 const db = require("../config/db.js");
 const {uploadS3} = require("../utils/uploadaws.js")
+const { v4: uuidv4 } = require('uuid');
 
 const getProductDetails = asyncHandler(async (req, res, next) => {
 	const { productId } = req.query;
@@ -44,7 +45,7 @@ const getProductDetails = asyncHandler(async (req, res, next) => {
 	);
 	let productImages;
     db.query(
-		`SELECT pictureId,key,productId FROM pictures WHERE productId = ?`, [productId],
+		`SELECT imageId,imageKey,productId FROM images WHERE productId = ?`, [productId],
 		async (err, results) => {
 			if (err) {
 				console.log(err);
@@ -133,36 +134,37 @@ const createProduct = asyncHandler(async (req, res, next) => {
 					next(new Error("Server Error"));
 				}
 				else{
+				
 					newProductId = results.insertId
-				}
-			}
-		);
-
-		// insert images at last
-		let images = [];
-		console.log(picturesArray)
-		for (let i = 0; i < picturesArray.length; i++) {
-			console.log('picturenm', picturesArray[i]);
-			images.push([picturesArray[i], req.user.userId, req.user.userId], newProductId)
-		}
-		// do all logic inside this
-		db.query(
-			`INSERT INTO pictures (key, sellerId, userId, productId) VALUES ?`,
-			[images],
-			async (err, results) => {
-				if (err) {
-					console.log(err);
-					res.status(500);
-					next(new Error("Server Error"));
-				} else {
-
-					res.status(200).json({
-						msg: "Product Images",
-						data: {
-							picturesArray
-						},
-						success: true,
-					});
+					console.log(newProductId)
+					// insert images at last
+					let images = [];
+					console.log(picturesArray)
+					for (let i = 0; i < picturesArray.length; i++) {
+						console.log('picturenm', picturesArray[i]);
+						images.push([picturesArray[i], req.user.userId, req.user.userId, newProductId])
+					}
+					// do all logic inside this
+					db.query(
+						`INSERT INTO images (imageKey, sellerId, userId, productId) VALUES ?`,
+						[images],
+						async (err, results) => {
+							if (err) {
+								console.log(err);
+								res.status(500);
+								next(new Error("Server Error"));
+							} else {
+			
+								res.status(200).json({
+									msg: "Product Images",
+									data: {
+										picturesArray
+									},
+									success: true,
+								});
+							}
+						}
+					);
 				}
 			}
 		);
