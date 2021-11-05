@@ -14,7 +14,10 @@ const insertDummyOrders = asyncHandler(async (req, res, next) => {
             next(new Error("SERVER ERROR"))
         }
         else {
-            res.send(results)
+            res.status(200).json({
+                msg: "Orders created",
+                success: true,
+            });
         }
     })
 
@@ -29,7 +32,14 @@ const getAllOrderDetails = asyncHandler(async (req, res, next) => {
             next(new Error("SERVER ERROR"))
         }
         else {
-            res.send(results)
+            res.status(200).json({
+                msg: "Order Details",
+                data: {
+                    Orders: results
+                },
+                success: true,
+            });
+         
         }
     })
 })
@@ -67,22 +77,57 @@ const getAllOrderDetails = asyncHandler(async (req, res, next) => {
 //     console.log(`orignal base price first ${originalBasePrice}`);
 //     return originalBasePrice
 // }
+async function getBasePrice(products) {
+    let productDetails=[];
+    // console.log(products)
+    const promises = products.map((product) => fetchProductDetails(product, productDetails));
+    await Promise.all(promises);
+    return productDetails
+}
+  
+const fetchProductDetails=(product, productDetails)=> {
 
+    return new Promise((resolve, reject) => {
+        db.query(`SELECT * from products WHERE productId=?`,[product],
+            async (err, results) => {
+                if (err) {
+                    console.log(err)
+                    reject(err);
+                }
+                else {
+                    resolve(productDetails.push(results[0]))
+                }
+            }
+        )
+    })
+}
 const makeOrder = asyncHandler(async (req, res, next) => {
-    const { products, userId, sellerId, status, deliveryCharge, basePrice } = req.body;
-    db.query(`INSERT INTO orders (products, userId,sellerId, status,deliveryCharge,basePrice) VALUES (?)`,
-        [[JSON.stringify(products), userId, sellerId, status, deliveryCharge, basePrice]],
-        async (err, results) => {
-            if (err) {
-                console.log(err)
-                res.status(500)
-                next(new Error("SERVER ERROR"))
-            }
-            else {
-                res.send(results)
-            }
-        }
-    )
+    const { products } = req.body;
+
+   const productDetails = await getBasePrice(products)
+
+    if(productDetails){
+        console.log(productDetails)
+    }
+    // db.query(`INSERT INTO orders (products, userId,sellerId, status,deliveryCharge,basePrice) VALUES (?)`,
+    //     [[JSON.stringify(products), userId, sellerId, status, deliveryCharge, basePrice]],
+    //     async (err, results) => {
+    //         if (err) {
+    //             console.log(err)
+    //             res.status(500)
+    //             next(new Error("SERVER ERROR"))
+    //         }
+    //         else {
+    //             res.status(200).json({
+    //                 msg: "Order Created",
+    //                 data: {
+    //                     orderId: results.insertId
+    //                 },
+    //                 success: true,
+    //             });
+    //         }
+    //     }
+    // )
 })
 const updatePaymentDetails = asyncHandler(async (req, res, next) => {
     const { orderId, metadata } = req.body;
@@ -92,9 +137,6 @@ const updatePaymentDetails = asyncHandler(async (req, res, next) => {
                 console.log(err)
                 res.status(500)
                 next(new Error("SERVER ERROR"))
-            }
-            else {
-                console.log(results)
             }
         }
     )
@@ -106,7 +148,13 @@ const updatePaymentDetails = asyncHandler(async (req, res, next) => {
                 next(new Error("SERVER ERROR"))
             }
             else {
-                res.send(results)
+                res.status(200).json({
+                    msg: "Transaction Successful",
+                    data: {
+                        transactionId: results.insertId
+                    },
+                    success: true,
+                });
             }
         }
     )
@@ -120,7 +168,13 @@ const getOrderDetails = asyncHandler(async (req, res, next) => {
             next(new Error("SERVER ERROR"))
         }
         else {
-            res.send(results)
+            res.status(200).json({
+                msg: "Order Details",
+                data: {
+                    Order: results[0]
+                },
+                success: true,
+            });
         }
     })
 })

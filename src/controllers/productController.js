@@ -9,7 +9,7 @@ const axios = require("axios");
 const asyncHandler = require("express-async-handler");
 const db = require("../config/db.js");
 const {uploadS3} = require("../utils/uploadaws.js")
-const { v4: uuidv4 } = require('uuid');
+
 
 const getProductDetails = asyncHandler(async (req, res, next) => {
 	const { productId } = req.query;
@@ -156,10 +156,7 @@ const createProduct = asyncHandler(async (req, res, next) => {
 							} else {
 			
 								res.status(200).json({
-									msg: "Product Images",
-									data: {
-										picturesArray
-									},
+									msg: "Product Created",
 									success: true,
 								});
 							}
