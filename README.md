@@ -19,7 +19,7 @@
 <p align="center">
 
 
-  <h3 align="center">Myntra Repurpose</h3>
+  <h3 align="center">Myntra Repurpose Server</h3>
 
   <p align="center">
     An awesome website to make online thrifting market organized and mainstream. Made with Love.
