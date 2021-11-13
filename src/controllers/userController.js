@@ -119,7 +119,7 @@ const register = asyncHandler(async (req, res, next) => {
 });
 
 const googleLogin = asyncHandler(async (req, res, next) => {
-	var { email, firstName, lastName, googleId } = req.body;
+	var { email, firstName, lastName, googleId, profileUrl } = req.body;
 
 	console.log(req.body);
 	db.query(
@@ -187,6 +187,7 @@ const googleLogin = asyncHandler(async (req, res, next) => {
 					firstName: firstName,
 					lastName: lastName,
 					googleID: googleId,
+					profileUrl: profileUrl
 				};
 				db.query("INSERT INTO users SET ?", newUser, (err, results) => {
 					if (err) {
