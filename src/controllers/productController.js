@@ -58,7 +58,7 @@ const getProductDetails = asyncHandler(async (req, res, next) => {
 		}
 	);
 	db.query(
-		`SELECT productId,title,isSold,gender,category,kids,dateOfPurchase,size,sellerId,brand,totalPrice,description, firstName, lastName FROM products INNER JOIN users on products.sellerId=users.userId WHERE productId=?`,
+		`SELECT productId,title,isSold,gender,category,kids,dateOfPurchase,size,sellerId,brand,basePrice,description, firstName, lastName FROM products INNER JOIN users on products.sellerId=users.userId WHERE productId=?`,
 		[productId],
 		async (err, results) => {
 			if (err) {
