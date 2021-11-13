@@ -78,7 +78,7 @@ const getTrendingThrifts = asyncHandler(async (req, res, next) => {
 const getTrendingSellers = asyncHandler(async (req, res, next) => {
 	
 	db.query(
-		`SELECT longitude, latitude FROM users WHERE userId=?`,
+		`SELECT baseLongitude, baseLatitude FROM users WHERE userId=?`,
 		req.user.userId,
 		async (err, results) => {
 			if (err) {
