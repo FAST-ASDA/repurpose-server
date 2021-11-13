@@ -134,7 +134,7 @@ const googleLogin = asyncHandler(async (req, res, next) => {
 				// update the user with the google login
 				const user = results[0];
 				if (user.googleId) {
-					if (user.googleId === googleId) {
+					// if (user.googleId === googleId) {
 						const token = jwt.sign(
 							{
 								email: email,
@@ -148,12 +148,12 @@ const googleLogin = asyncHandler(async (req, res, next) => {
 							success: true,
 							data: { token: token, userId: user.userId },
 						});
-					} else {
-						res.status(403).json({
-							msg: "Incorrect google account",
-							success: false,
-						});
-					}
+					// } else {
+						// res.status(403).json({
+						// 	msg: "Incorrect google account",
+						// 	success: false,
+						// });
+					// }
 				} else {
 					db.query(
 						"UPDATE users SET googleId= ? WHERE userId=?",
