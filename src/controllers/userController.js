@@ -378,7 +378,7 @@ const getSellerProfile = asyncHandler(async (req, res, next) => {
 	);
 	let sellerProducts;
 	db.query(
-		`SELECT * FROM products WHERE seller=?`,
+		`SELECT * FROM products WHERE sellerId=?`,
 		[sellerId],
 		async (err, results) => {
 			if (err) {
